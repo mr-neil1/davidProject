@@ -1,0 +1,11 @@
+# Web Frameworks
+django>=4.2
+flask>=3.0
+
+# Communication & API
+pyserial>=3.5
+requests>=2.31
+
+# Utilitaires (Optionnels mais recommandés)
+flask-cors>=4.0
+gunicorn>=21.2

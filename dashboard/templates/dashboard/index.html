@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moniteur Arduino - Django & Flask</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; text-align: center; }
+        .container { width: 80%; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 50px; }
+        .value-box { font-size: 3rem; font-weight: bold; color: #2c3e50; }
+        .status-online { color: #27ae60; }
+        .status-offline { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Dashboard Firmware</h1>
+    <div class="value-box" id="raw-value">--</div>
+    <p>Statut : <span id="status">Recherche de l'Arduino...</span></p>
+    
+    <canvas id="myChart" width="400" height="150"></canvas>
+</div>
+
+<script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const maxDataPoints = 20; // Nombre de points visibles sur le graphique
+    
+    // Initialisation du graphique
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Valeur Analogique (A0)',
+                data: [],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true, max: 1024 } } // L'Arduino va de 0 à 1023
+        }
+    });
+
+    function updateData() {
+        fetch('/api/sensor/')
+            .then(response => response.json())
+            .then(data => {
+                const val = data.value;
+                const statusEl = document.getElementById('status');
+                
+                if (data.status === "success") {
+                    document.getElementById('raw-value').innerText = val;
+                    statusEl.innerText = "Connecté";
+                    statusEl.className = "status-online";
+
+                    // Mise à jour du graphique
+                    const now = new Date().toLocaleTimeString();
+                    if (myChart.data.labels.length >= maxDataPoints) {
+                        myChart.data.labels.shift();
+                        myChart.data.datasets[0].data.shift();
+                    }
+                    myChart.data.labels.push(now);
+                    myChart.data.datasets[0].data.push(val);
+                    myChart.update('none'); // Update sans animation pour plus de fluidité
+                } else {
+                    statusEl.innerText = "Déconnecté / Erreur";
+                    statusEl.className = "status-offline";
+                }
+            });
+    }
+
+    // On rafraîchit toutes les 500ms (comme le delay de votre Arduino)
+    setInterval(updateData, 500);
+</script>
+
+</body>
+</html>
