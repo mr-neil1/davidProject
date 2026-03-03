@@ -22,10 +22,10 @@ Un câble USB pour l'Arduino
 2. Configuration de l'environnement
 Bash
 # Cloner le projet (ou entrer dans le dossier)
-cd mon_projet_firmware
+cd fetchFirmeware
 
 # Créer et activer l'environnement virtuel
-python -m venv venv
+python -m venv venv // déjà fait tu passe a la ligne suivante
 source venv/bin/activate  # Linux/Mac
 # venv\Scripts\activate  # Windows
 
